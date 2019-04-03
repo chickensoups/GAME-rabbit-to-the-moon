@@ -11,13 +11,29 @@ public abstract class CoreController : MonoBehaviour
     // Level
     public Level level;
 
+    // Level
+    public Level nextLevel;
+
     // Panel
     public GameObject buttonPanel;
+
+    // Character
+    public GameObject character;
+
+    // Current ladder index
+    public int currentLadderIndex = 1;
 
     #region Init and Update methods
     protected void InitData()
     {
         // init data stuff
+        InitCharacter();
+    }
+
+    protected void InitCharacter()
+    {
+        // move character to the first ladder position
+        character.transform.position = level.ladders[0].initPosition.GetV3();
     }
 
     #endregion
@@ -36,6 +52,7 @@ public abstract class CoreController : MonoBehaviour
         ControllerUtil.init();
         LevelUtil.init();
         Refresh();
+        InitData();
     }
 
     public abstract void Refresh(bool withBackup = false);
@@ -53,12 +70,34 @@ public abstract class CoreController : MonoBehaviour
     {
     }
 
-
-    #region Utilities methods
-    protected GameObject[] findGameObjectsWithTag(string tag)
+    public bool IsCurrentLadderIsLast()
     {
-        return GameObject.FindGameObjectsWithTag(tag);
+        return currentLadderIndex == level.ladders.Count;
     }
 
-    #endregion
+    public void JumpDoneValidate()
+    {
+        if(IsCurrentLadderIsLast())
+        {
+            AudioManager.Instance.playSound(Constants.ResourcesName.winSound);
+
+            // Save unlocked checkpoint to player data
+            PlayerDataUtil.playerData.unlockedCheckpoint++;
+            PlayerDataUtil.SavePlayerData();
+
+            // Load next level
+            Level level = LevelUtil.LoadLevelData(LevelUtil.getCurrentLevel().index + 1);
+            LevelUtil.setCurrentLevel(level);
+            Refresh();
+        }
+    }
+
+    protected void DestroyAllLadder()
+    {
+        GameObject[] objs = GameObjectUtils.FindGameObjectsWithTag(Constants.ObjectTags.ladder.ToString());
+        foreach(GameObject obj in objs)
+        {
+            Destroy(obj);
+        }
+    }
 }

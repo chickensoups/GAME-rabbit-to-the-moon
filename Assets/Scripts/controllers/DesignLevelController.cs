@@ -28,16 +28,17 @@ public class DesignLevelController : CoreController
             level = new Level(levelIndex, tutorialContent, ladderInfos);
             LevelUtil.setCurrentLevel(level);
 
-            GameObject[] ladders = findGameObjectsWithTag(Constants.ObjectTags.ladder.ToString());
+            GameObject[] ladders = GameObjectUtils.FindGameObjectsWithTag(Constants.ObjectTags.ladder.ToString());
+            GameObjectUtils.SortGameObjectByPositionY(ladders);
             for (int i = 0; i < ladders.Length; i++)
             {
                 GameObject ladder = ladders[i];
                 LadderInfo ladderInfo = new LadderInfo();
-                Explode ladderExplode = ladder.GetComponent<Explode>();
+                Ladder ladderComponent = ladder.GetComponent<Ladder>();
 
-                ladderInfo.initAngle = -1 * ladderExplode.initAngle;
-                ladderInfo.type = Constants.LadderType.longLadder; // todo:
-                ladderInfo.timeout = ladderExplode.timeout;
+                ladderInfo.initAngle = -1 * ladderComponent.initAngle;
+                ladderInfo.type = Constants.LadderType.normalLadder;
+                ladderInfo.timeout = ladderComponent.timeout;
 
                 LadderRotate ladderRotate = ladder.GetComponent<LadderRotate>();
                 if (ladderRotate.speed > 0)
@@ -96,21 +97,11 @@ public class DesignLevelController : CoreController
         if (overrideLevelData)
         {
             Debug.Log("Override level data");
-            level = null;
-        }
-        else
-        {
-            level = LevelUtil.LoadLevelData(levelIndex);
-        }
-
-        // If this level is already has, then load level data
-        if (level == null)
-        {
             GenerateLevelData(withBackup);
         }
         else
         {
-            Debug.Log("Level it not null");
+            level = LevelUtil.LoadLevelData(levelIndex);
         }
     }
 }

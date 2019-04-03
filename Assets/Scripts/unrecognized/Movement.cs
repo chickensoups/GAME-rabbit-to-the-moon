@@ -70,6 +70,10 @@ public class Movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (speed <=0)
+        {
+            return;
+        }
         if (type == Constants.MovementTypes.circle) // Move in a circle shape
         {
             if (isClockwise)
